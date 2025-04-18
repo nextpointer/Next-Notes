@@ -301,6 +301,7 @@ export default function Home() {
                 className="rounded-3xl "
               >
                 {isGenerating ? "Generating..." : "Auto-Generate Content"}
+                
               </Button>
             </DrawerFooter>
           </DrawerContent>
