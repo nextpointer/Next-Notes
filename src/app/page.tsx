@@ -14,7 +14,7 @@ import { useNotes } from "./Context/NotesContext";
 import { Note } from "@/utils/types";
 import { useToast } from "@/hooks/use-toast";
 import { getNoteContent } from "@/lib/useAi";
-import Markdown from "react-markdown";
+
 
 
 export default function Home() {
@@ -276,7 +276,7 @@ export default function Home() {
                 className="w-full h-[45vh] px-3 py-2 mt-1 border rounded-md outline-none border-none overflow-y-scroll"
                 style={{ whiteSpace: "pre-wrap" }}
               >
-                <Markdown>{newContent}</Markdown>
+                {newContent}
               </div>
               <p className="text-sm text-gray-500">
                 {newContent.length}/{MAX_CONTENT_LENGTH} characters
