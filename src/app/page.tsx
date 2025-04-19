@@ -271,7 +271,6 @@ export default function Home() {
               </div>
               <div
                 contentEditable={isEditable}
-                suppressContentEditableWarning={true}
                 onBlur={handleNotesContent}
                 className="w-full h-[45vh] px-3 py-2 mt-1 border rounded-md outline-none border-none overflow-y-scroll"
                 style={{ whiteSpace: "pre-wrap" }}
