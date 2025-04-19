@@ -3,14 +3,16 @@ import { atom } from "jotai";
 // For the notes header
 export const Header = atom<string>("");
 // For the notes Content
-export const Content = atom<string[]>([])
+export const Content = atom<string>("")
 // for the editing index
 export const EIndex = atom<number | null>(null);
 // For the error
 export const Error = atom<string>("")
 // For the editing state
-export const isEditable = atom<boolean>(false)
+export const IsEditable = atom<boolean>(false)
 // for the ai content generating or not
-export const isGenerating = atom<boolean>(false)
+export const IsGenerating = atom<boolean>(false)
 // For the new Note or not
-export const isNewNote = atom<boolean>(false);
+export const IsNewNote = atom<boolean>(false);
+// For the drawer
+export const ShowDrawer = atom<boolean>(false);

@@ -2,37 +2,37 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerFooter,
-} from "@/components/ui/drawer";
+import { Drawer } from "@/components/ui/drawer";
 
 import { useNotes } from "./Context/NotesContext";
 import { Note } from "@/utils/types";
 import { useToast } from "@/hooks/use-toast";
 import { getNoteContent } from "@/lib/useAi";
 import Editor from "@/components/custom/Editor";
-
-
+import { useAtom } from "jotai";
+import {
+  EIndex,
+  Header,
+  IsEditable,
+  IsGenerating,
+  IsNewNote,
+  ShowDrawer,
+  Error,
+  Content,
+} from "./store/atom";
 
 export default function Home() {
   const [isRotated, setIsRotated] = useState<boolean>(false);
   const [startAnimation, setStartAnimation] = useState<boolean>(false);
-  const [showDrawer, setShowDrawer] = useState<boolean>(false);
-  const [newHeader, setNewHeader] = useState<string>("");
-  const [newContent, setNewContent] = useState<string>("");
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [error, setError] = useState<string>("");
-  const [isEditable, setEditable] = useState<boolean>(false);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [isNewNote, setNewNote] = useState<boolean>(false);
+  const [, setEditIndex] = useAtom(EIndex);
+  const [, setError] = useAtom(Error);
+  const [newHeader, setNewHeader] = useAtom(Header);
+  const [, setEditable] = useAtom(IsEditable);
+  const [newContent, setNewContent] = useAtom(Content);
+  const [isNewNote, setNewNote] = useAtom(IsNewNote);
+  const [showDrawer, setShowDrawer] = useAtom(ShowDrawer);
 
-  const { notes, addNote, deleteNote, updateNote } = useNotes();
-  const { toast } = useToast();
-  const MAX_CONTENT_LENGTH = 100000;
+  const { notes, deleteNote } = useNotes();
 
   useEffect(() => {
     localStorage.clear();
@@ -42,64 +42,21 @@ export default function Home() {
   }, []);
 
   const resetForm = () => {
-    // setNewHeader("");
-    // setNewContent("");
     setEditIndex(null);
     setError("");
   };
 
-  const validateInputs = () => {
-    if (!newHeader.trim()) return "Header cannot be empty.";
-    if (!newContent.trim()) return "Content cannot be empty.";
-    if (newContent.trim().length > MAX_CONTENT_LENGTH)
-      return `Content cannot exceed ${MAX_CONTENT_LENGTH} characters.`;
-    return "";
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
   };
-
-  const handleAddOrUpdateNote = () => {
-    const errorMessage = validateInputs();
-    if (errorMessage) {
-      setError(errorMessage);
-      return;
-    }
-
-    const noteData: Note = {
-      header: newHeader.replace(/\b\w/g, (char) => char.toUpperCase()),
-      sentence: newContent,
-      date: new Date().toISOString(),
-    };
-
-    if (editIndex !== null) {
-      updateNote(editIndex, noteData);
-    } else {
-      addNote(noteData);
-    }
-
-    setShowDrawer(false);
-    resetForm();
-    toast({
-      title: `${editIndex !== null ? "Saved" : "Created"}`,
-      description: `Note has been successfully ${
-        editIndex !== null ? "Saved" : "Created"
-      }`,
-    });
-    toggleEditChane();
-    setNewHeader("");
-    setNewContent("");
+  const toggleEditChane = () => {
+    setEditable(true);
   };
-
-  console.log(newHeader, newContent);
-
-  const handleOpenDrawerForEdit = (index: number) => {
-    setEditIndex(index);
-    setNewHeader(notes[index].header);
-    setNewContent(notes[index].sentence);
-    setShowDrawer(true);
-    toggleEditChane();
-    setNewNote(false);
-  };
-
-
 
   const handleRotate = () => {
     setIsRotated(!isRotated);
@@ -114,52 +71,13 @@ export default function Home() {
     setNewContent(localStorage.getItem("Content") || "");
   };
 
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  };
-
-  const handleNotesContent = (e: React.FocusEvent<HTMLDivElement>) => {
-    const content = e.currentTarget.innerText;
-    if (content.length <= MAX_CONTENT_LENGTH) {
-      setNewContent(content);
-    } else {
-      toast({
-        title: "Character Limit Exceeded",
-        description: `Content cannot exceed ${MAX_CONTENT_LENGTH} characters.`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const toggleEditChane = () => {
-    setEditable(true);
-  };
-
-  const handleGenerateNoteContent = async () => {
-    if (!newHeader.trim()) {
-      setError("Header cannot be empty to generate content.");
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const generatedResponse = await getNoteContent(newContent);
-      // Set the newContent as HTML
-      setNewContent(newContent+"\n"+generatedResponse);
-    } catch (err) {
-      toast({
-        title: "Generation Failed",
-        description: "Unable to generate content. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleOpenDrawerForEdit = (index: number) => {
+    setEditIndex(index);
+    setNewHeader(notes[index].header);
+    setNewContent(notes[index].sentence);
+    setShowDrawer(true);
+    toggleEditChane();
+    setNewNote(false);
   };
 
   // On close the drawer the temp data stored on the local storage
@@ -176,14 +94,6 @@ export default function Home() {
       setNewContent(localStorage.getItem("Content") || "");
     }
     setEditable(true);
-  };
-
-  const removeLocalData = () => {
-    localStorage.removeItem("Header");
-    localStorage.removeItem("Content");
-    setNewHeader("");
-    setNewContent("");
-    setEditable(false);
   };
 
   return (
@@ -249,10 +159,8 @@ export default function Home() {
           onOpenChange={setShowDrawer}
           closeThreshold={0.5}
           onAnimationEnd={setTempToLocal}
-          
-          
         >
-          <Editor/>
+          <Editor />
         </Drawer>
       </main>
     </>
