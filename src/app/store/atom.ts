@@ -16,3 +16,6 @@ export const IsGenerating = atom<boolean>(false)
 export const IsNewNote = atom<boolean>(false);
 // For the drawer
 export const ShowDrawer = atom<boolean>(false);
+
+// for sample auth
+export const isAuth = atom<boolean>(true);

@@ -19,7 +19,9 @@ import {
   ShowDrawer,
   Error,
   Content,
+  isAuth,
 } from "./store/atom";
+import HomePage from "@/components/custom/HomePage";
 
 export default function Home() {
   const [isRotated, setIsRotated] = useState<boolean>(false);
@@ -31,8 +33,11 @@ export default function Home() {
   const [newContent, setNewContent] = useAtom(Content);
   const [isNewNote, setNewNote] = useAtom(IsNewNote);
   const [showDrawer, setShowDrawer] = useAtom(ShowDrawer);
+  const [isAuthenticaticated] = useAtom(isAuth);
 
   const { notes, deleteNote } = useNotes();
+
+  if(isAuthenticaticated) return <HomePage/>
 
   useEffect(() => {
     localStorage.clear();

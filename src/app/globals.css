@@ -2,8 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+
+
 body {
   font-family: Arial, Helvetica, sans-serif;
+}
+
+main{
+  background:
+        linear-gradient(-90deg, rgba(0, 0, 0, .04) 1px, transparent 1px),
+        linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size:
+        4px 4px,
+        4px 4px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px,
+        80px 80px;
+/* background-color: var(--foreground); */
+/* background-color: #0f0f0f; */
 }
 
 @layer base {
@@ -24,7 +43,7 @@ body {
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
+    --border: 220, 8.94%, 46.08%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
     --chart-1: 12 76% 61%;
@@ -70,6 +89,38 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+
+.captureYourThought::before {
+  content: "Capture Your Thoughts";
+  position: absolute;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: white;
+  bottom: 1px;
+}
+.OrganizeYour::before{
+  content: "Organise Your";
+  position: absolute;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: white;
+  bottom: 1px;
+}
+
+.IdeasWithAI{
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+.IdeasWithAI::before{
+  content: "Ideas with AI";
+  position: absolute;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: white;
+  bottom: 1px;
+  width: 100%;
+  /* background: #ff101052; */
+}
+
+
 
 
 @keyframes appear {
