@@ -8,29 +8,57 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import React from "react";
+import { useEffect } from "react";
 import { ArrowBigLeft } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 const MotionCard = motion(Card);
 
-export default function page() {
+export default function LoginPage() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) router.push("/");
+    };
+
+    checkAuth();
+  }, [router, supabase.auth]);
+
+  const handleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      console.error("Login error:", error);
+      router.push("/login?message=Could not authenticate user");
+    }
+  };
+
   return (
     <main className="h-screen w-full flex justify-center items-center p-3">
-        <Link href={"/"} className="absolute left-5 top-5">
-            <ArrowBigLeft/>
-        </Link>
-<MotionCard
-  className="w-full max-w-md mx-auto rounded-xl border bg-white border-gray-500 relative isolate "
-  style={{
-    boxShadow: "7px 7px 0 0 #888888"
-  }}
-  initial={{ opacity: 0, scale: 0.95 }}
-  animate={{ opacity: 1, scale: 1 }}
-  exit={{ opacity: 0, scale: 0.9 }}
-  transition={{ duration: 0.2 }}
->
+      <Link href={"/"} className="absolute left-5 top-5">
+        <ArrowBigLeft />
+      </Link>
+
+      <MotionCard
+        className="w-full max-w-md mx-auto rounded-xl border bg-white border-gray-500 relative isolate"
+        style={{ boxShadow: "7px 7px 0 0 #888888" }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+      >
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
           <CardDescription className="text-center">
@@ -48,7 +76,7 @@ export default function page() {
               </span>
             </div>
           </div>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full" onClick={handleSignIn}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="48"

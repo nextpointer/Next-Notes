@@ -3,18 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Drawer } from "@/components/ui/drawer";
-
 import { useNotes } from "./Context/NotesContext";
 import { Note } from "@/utils/types";
-import { useToast } from "@/hooks/use-toast";
-import { getNoteContent } from "@/lib/useAi";
 import Editor from "@/components/custom/Editor";
 import { useAtom } from "jotai";
 import {
   EIndex,
   Header,
   IsEditable,
-  IsGenerating,
   IsNewNote,
   ShowDrawer,
   Error,
@@ -22,10 +18,10 @@ import {
   isAuth,
 } from "./store/atom";
 import HomePage from "@/components/custom/HomePage";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Home() {
   const [isRotated, setIsRotated] = useState<boolean>(false);
-  const [startAnimation, setStartAnimation] = useState<boolean>(false);
   const [, setEditIndex] = useAtom(EIndex);
   const [, setError] = useAtom(Error);
   const [newHeader, setNewHeader] = useAtom(Header);
@@ -33,17 +29,31 @@ export default function Home() {
   const [newContent, setNewContent] = useAtom(Content);
   const [isNewNote, setNewNote] = useAtom(IsNewNote);
   const [showDrawer, setShowDrawer] = useAtom(ShowDrawer);
-  const [isAuthenticaticated] = useAtom(isAuth);
+  const [isAuthenticated, setAuthenticated] = useAtom(isAuth);
+  const [loading, setLoading] = useState(true);
 
+  const supabase = createClient();
   const { notes, deleteNote } = useNotes();
 
-  if(isAuthenticaticated) return <HomePage/>
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setAuthenticated(!!session);
+      } catch (error) {
+        console.error("Error checking session:", error);
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     localStorage.clear();
-    return () => {
-      localStorage.clear();
-    };
+    return () => localStorage.clear();
   }, []);
 
   const resetForm = () => {
@@ -59,19 +69,15 @@ export default function Home() {
       day: "numeric",
     }).format(date);
   };
-  const toggleEditChane = () => {
-    setEditable(true);
-  };
+
+  const toggleEditChange = () => setEditable(true);
 
   const handleRotate = () => {
     setIsRotated(!isRotated);
-    setStartAnimation(!startAnimation);
     setShowDrawer(true);
     resetForm();
-    toggleEditChane();
+    toggleEditChange();
     setNewNote(true);
-    setNewHeader("");
-    setNewContent("");
     setNewHeader(localStorage.getItem("Header") || "");
     setNewContent(localStorage.getItem("Content") || "");
   };
@@ -81,25 +87,20 @@ export default function Home() {
     setNewHeader(notes[index].header);
     setNewContent(notes[index].sentence);
     setShowDrawer(true);
-    toggleEditChane();
+    toggleEditChange();
     setNewNote(false);
   };
 
-  // On close the drawer the temp data stored on the local storage
   const setTempToLocal = () => {
-    console.log("New Note", isNewNote);
-
-    setNewHeader("");
-    setNewContent("");
-
     if (isNewNote) {
       localStorage.setItem("Header", newHeader);
       localStorage.setItem("Content", newContent);
-      setNewHeader(localStorage.getItem("Header") || "");
-      setNewContent(localStorage.getItem("Content") || "");
     }
     setEditable(true);
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (!isAuthenticated) return <HomePage />;
 
   return (
     <>
